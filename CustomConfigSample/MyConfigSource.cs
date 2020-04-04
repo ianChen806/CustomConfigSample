@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
 namespace CustomConfigSample
@@ -13,18 +14,32 @@ namespace CustomConfigSample
 
     public class MyConfigProvider : ConfigurationProvider
     {
-        public override void Load()
+        public MyConfigProvider()
         {
-            Data["Version"] = DateTime.Now.Ticks.ToString();
-
-            ReloadData();
-            
-            OnReload();
+            Task.Run(async () =>
+            {
+                while(true)
+                {
+                    await Task.Delay(1000 * 3);
+                    LoadData(true);
+                }
+            });
         }
 
-        private void ReloadData()
+        public override void Load()
         {
-            //any thing...
+            LoadData(false);
+        }
+
+        private void LoadData(bool reload)
+        {
+            //anything...
+            Data["Version"] = DateTime.Now.Ticks.ToString();
+
+            if (reload)
+            {
+                OnReload();
+            }
         }
     }
 }

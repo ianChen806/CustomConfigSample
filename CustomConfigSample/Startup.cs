@@ -1,15 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 
 namespace CustomConfigSample
 {
@@ -21,13 +16,6 @@ namespace CustomConfigSample
         }
 
         public IConfiguration Configuration { get; }
-
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.Configure<MyConfig>(GetMyConfig());
-            
-            services.AddControllers();
-        }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -46,6 +34,20 @@ namespace CustomConfigSample
             {
                 endpoints.MapControllers();
             });
+        }
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+            var configurationRoot = GetMyConfig();
+            ChangeToken.OnChange(configurationRoot.GetReloadToken,
+                                 () =>
+                                 {
+                                     Console.WriteLine(DateTime.Now.Ticks);
+                                 });
+            
+            services.Configure<MyConfig>(configurationRoot);
+
+            services.AddControllers();
         }
 
         private static IConfigurationRoot GetMyConfig()
