@@ -22,12 +22,10 @@ namespace CustomConfigSample
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-
-        // This method gets called by the runtime. Use this method to add services to the container.
-
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<MyConfig>(GetMyConfig());
+            
             services.AddControllers();
         }
 
@@ -48,6 +46,14 @@ namespace CustomConfigSample
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private static IConfigurationRoot GetMyConfig()
+        {
+            var configurationBuilder = new ConfigurationBuilder();
+            configurationBuilder.Add(new MyConfigSource());
+
+            return configurationBuilder.Build();
         }
     }
 }
